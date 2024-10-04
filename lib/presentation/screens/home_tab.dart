@@ -2,97 +2,246 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../theme/colors.dart'; // Import your color theme
 
-class HomeTab extends StatelessWidget {
+class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
 
   @override
+  _HomeTabState createState() => _HomeTabState();
+}
+
+class _HomeTabState extends State<HomeTab> {
+  final List<String> _affirmations = [
+    '“Believe in yourself and all that you are.”',
+    '“You are stronger than you think.”',
+    '“Every day is a second chance.”',
+    '“You are enough just as you are.”',
+    '“Do not let what you cannot do interfere with what you can do.”',
+  ];
+
+  final List<String> _appointments = [
+    'Appointment with Dr. Smith on 2024-10-10 at 10:00 AM',
+    'Appointment with Dr. Jones on 2024-10-12 at 2:00 PM',
+  ];
+
+  final String _tipOfTheDay =
+      'Take a 5-minute break every hour to stretch and reset your mind.';
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-        backgroundColor: peachColor,
-        actions: [
-          TextButton(
-            onPressed: () {
-              // Implement logout functionality here
-              Navigator.pop(context); // Placeholder for logout
-            },
-            child: const Text(
-              'Logout',
-              style: TextStyle(color: Colors.white),
-            ),
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: backgroundColor,
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20), // Added space at the top
+              Row(
+                mainAxisAlignment: MainAxisAlignment
+                    .spaceBetween, // Aligns items on the same line
+                children: [
+                  const Text(
+                    'Hello, John Doe',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: peachColor,
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      // Implement logout functionality
+                      _logout();
+                    },
+                    icon: const Icon(FontAwesomeIcons.arrowRightFromBracket,
+                        color: Colors.white),
+                    label: const Text('Logout',
+                        style: TextStyle(color: Colors.white)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          peachColor, // Set the background color to peach
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 25),
+              // Daily Affirmations section
+              SizedBox(
+                height: 130, // Set a fixed height for the affirmation container
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _affirmations.length,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      width: 200, // Set a width for each affirmation card
+                      margin: const EdgeInsets.only(right: 10),
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: orangeColor,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 4,
+                            offset: Offset(2, 2),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          _affirmations[index],
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                            fontStyle: FontStyle.italic,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 25),
+              // Tip of the Day Section
+              const Text(
+                'Tip of the Day',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: orangeColor,
+                ),
+              ),
+              const SizedBox(height: 15),
+              Container(
+                height: 100,
+                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.2),
+                      blurRadius: 4,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  _tipOfTheDay,
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+              const SizedBox(height: 15),
+              // Upcoming Appointments Section
+              const Text(
+                'Upcoming Appointments',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: orangeColor,
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (var appointment in _appointments)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Text(
+                        appointment,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 25),
+              const Text(
+                'Quick Access',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: orangeColor,
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      _makeEmergencyCall('Emergency Hotline: 123-456-7890');
+                    },
+                    child: const Text(
+                      '123-456-7890',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: peachColor,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  TextButton(
+                    onPressed: () {
+                      _makeEmergencyCall('Mental Health Support: 098-765-4321');
+                    },
+                    child: const Text(
+                      '098-765-4321',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: peachColor,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  TextButton(
+                    onPressed: () {
+                      _makeEmergencyCall('Crisis Center: 111-222-3333');
+                    },
+                    child: const Text(
+                      '111-222-3333',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: peachColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Hello, John Doe',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: peachColor,
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Daily Affirmations & Positive Reminders',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: orangeColor,
-              ),
-            ),
-            const SizedBox(height: 10),
-            // Sample motivational quotes (You can replace these with dynamic content)
-            const Text(
-              '“Believe in yourself and all that you are.”',
-              style: TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              '“You are stronger than you think.”',
-              style: TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Quick Access to Emergency Contacts',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: orangeColor,
-              ),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton.icon(
-              onPressed: () {
-                // Implement call functionality here
-                // Placeholder: This will open the call log or dial a number
-                _makeEmergencyCall(context);
-              },
-              icon: const FaIcon(FontAwesomeIcons.phone),
-              label: const Text('Call Emergency Hotline'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: orangeColor,
-              ),
-            ),
-          ],
         ),
       ),
     );
   }
 
-  void _makeEmergencyCall(BuildContext context) {
+  void _makeEmergencyCall(String contact) {
     // Implement the function to access the phone dialer
-    // For example: using url_launcher or similar package
     // Placeholder: Show a snackbar or toast
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Opening call log...'),
+      SnackBar(
+        content: Text('Calling $contact...'),
       ),
     );
+  }
+
+  void _logout() {
+    // Implement logout functionality here
+    // Placeholder: Show a snackbar for demonstration
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Logged out successfully!'),
+      ),
+    );
+
+    // Navigate to the login screen (example)
+    Navigator.pushReplacementNamed(context, '/');
   }
 }

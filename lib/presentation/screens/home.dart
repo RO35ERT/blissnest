@@ -1,3 +1,7 @@
+import 'package:blissnest/presentation/screens/appointment.dart';
+import 'package:blissnest/presentation/screens/home_tab.dart';
+import 'package:blissnest/presentation/screens/journal.dart';
+import 'package:blissnest/presentation/screens/resources.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../theme/colors.dart'; // Import your custom theme
@@ -16,8 +20,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _screens = [
     const HomeTab(),
     const AppointmentsTab(),
-    const JournalsTab(),
-    const ResourcesTab(),
+    const JournalTab(),
+    const ResourceTab(),
   ];
 
   // Function to handle tab changes
@@ -81,63 +85,6 @@ class _HomeScreenState extends State<HomeScreen> {
           onTap: _onItemTapped,
           showUnselectedLabels: false, // Hide labels for unselected items
         ),
-      ),
-    );
-  }
-}
-
-// Sample Tab Screens
-class HomeTab extends StatelessWidget {
-  const HomeTab({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        'Home Screen',
-        style: TextStyle(fontSize: 24, color: peachColor),
-      ),
-    );
-  }
-}
-
-class AppointmentsTab extends StatelessWidget {
-  const AppointmentsTab({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        'Appointments Screen',
-        style: TextStyle(fontSize: 24, color: peachColor),
-      ),
-    );
-  }
-}
-
-class JournalsTab extends StatelessWidget {
-  const JournalsTab({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        'Journals Screen',
-        style: TextStyle(fontSize: 24, color: peachColor),
-      ),
-    );
-  }
-}
-
-class ResourcesTab extends StatelessWidget {
-  const ResourcesTab({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        'Resources Screen',
-        style: TextStyle(fontSize: 24, color: peachColor),
       ),
     );
   }
