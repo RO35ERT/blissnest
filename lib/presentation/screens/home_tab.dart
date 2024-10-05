@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../../theme/colors.dart'; // Import your color theme
+import '../../theme/colors.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -165,7 +166,7 @@ class _HomeTabState extends State<HomeTab> {
               ),
               const SizedBox(height: 25),
               const Text(
-                'Quick Access',
+                'Hot Lines',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -177,7 +178,7 @@ class _HomeTabState extends State<HomeTab> {
                 children: [
                   TextButton(
                     onPressed: () {
-                      _makeEmergencyCall('Emergency Hotline: 123-456-7890');
+                      _launchInWebView('1234567890');
                     },
                     child: const Text(
                       '123-456-7890',
@@ -190,7 +191,7 @@ class _HomeTabState extends State<HomeTab> {
                   const SizedBox(width: 16),
                   TextButton(
                     onPressed: () {
-                      _makeEmergencyCall('Mental Health Support: 098-765-4321');
+                      _launchInWebView('0987654321');
                     },
                     child: const Text(
                       '098-765-4321',
@@ -203,7 +204,7 @@ class _HomeTabState extends State<HomeTab> {
                   const SizedBox(width: 16),
                   TextButton(
                     onPressed: () {
-                      _makeEmergencyCall('Crisis Center: 111-222-3333');
+                      _launchInWebView('1112223333');
                     },
                     child: const Text(
                       '111-222-3333',
@@ -222,16 +223,6 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
-  void _makeEmergencyCall(String contact) {
-    // Implement the function to access the phone dialer
-    // Placeholder: Show a snackbar or toast
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Calling $contact...'),
-      ),
-    );
-  }
-
   void _logout() {
     // Implement logout functionality here
     // Placeholder: Show a snackbar for demonstration
@@ -243,5 +234,18 @@ class _HomeTabState extends State<HomeTab> {
 
     // Navigate to the login screen (example)
     Navigator.pushReplacementNamed(context, '/');
+  }
+
+  Future<void> _launchInWebView(String number) async {
+    Uri url = Uri.parse("tel:$number");
+    try {
+      if (await canLaunchUrl(url)) {
+        launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        print("Failed to launch");
+      }
+    } catch (e) {
+      print(e.toString());
+    }
   }
 }

@@ -1,3 +1,4 @@
+import 'package:blissnest/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // Ensure to add the font_awesome_flutter package
 
@@ -56,7 +57,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black,
+                  color: peachColor,
                 ),
               ),
               const SizedBox(height: 20), // Space below the title
@@ -70,6 +71,9 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                 ),
               ),
               ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(peachColor),
+                ),
                 onPressed: () {
                   _showAppointmentDialog(
                       context); // Show dialog for adding new appointment
