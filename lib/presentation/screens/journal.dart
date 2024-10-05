@@ -46,7 +46,6 @@ class _JournalTabState extends State<JournalTab> {
                   // Placeholder for adding a new journal entry
                   _showJournalEntryDialog(context);
                 },
-                child: const Text('Add New Journal Entry'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: peachColor, // Button color
                   padding:
@@ -55,6 +54,7 @@ class _JournalTabState extends State<JournalTab> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
+                child: const Text('Add New Journal'),
               ),
             ],
           ),
