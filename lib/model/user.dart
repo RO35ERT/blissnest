@@ -6,6 +6,7 @@ class UserRegisterModel {
   String phone;
   String email;
   String password;
+  String role;
 
   UserRegisterModel({
     required this.nrc,
@@ -15,6 +16,7 @@ class UserRegisterModel {
     required this.phone,
     required this.email,
     required this.password,
+    required this.role,
   });
 
   // Convert the model to a JSON map to send it via the API
@@ -27,6 +29,7 @@ class UserRegisterModel {
       'phone': phone,
       'email': email,
       'password': password,
+      'role': role,
     };
   }
 }
