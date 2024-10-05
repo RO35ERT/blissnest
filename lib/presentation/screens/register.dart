@@ -1,10 +1,47 @@
+import 'package:blissnest/core/auth.dart';
+import 'package:blissnest/model/user.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 import '../../theme/text_styles.dart';
 import '../../theme/colors.dart';
 
-class RegisterScreen extends StatelessWidget {
+class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
+
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  final _formKey = GlobalKey<FormState>();
+
+  // Form data
+  final String _nrc = '';
+  final String _name = '';
+  final String _dob = '';
+  final String _address = '';
+  final String _phone = '';
+  final String _email = '';
+  final String _password = '';
+
+  void _submitForm(BuildContext context) {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+
+      final user = UserRegisterModel(
+        nrc: _nrc,
+        name: _name,
+        dob: _dob,
+        address: _address,
+        phone: _phone,
+        email: _email,
+        password: _password,
+      );
+
+      Provider.of<AuthProvider>(context, listen: false).registerUser(user);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -213,7 +250,7 @@ class RegisterScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   onPressed: () {
-                    Navigator.pushNamed(context, '/home');
+                    _submitForm(context);
                   },
                   child: Text('Register', style: AppTextStyles.button),
                 ),
