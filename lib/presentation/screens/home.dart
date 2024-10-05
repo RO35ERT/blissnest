@@ -1,4 +1,5 @@
 import 'package:blissnest/presentation/screens/appointment.dart';
+import 'package:blissnest/presentation/screens/chat.dart';
 import 'package:blissnest/presentation/screens/home_tab.dart';
 import 'package:blissnest/presentation/screens/journal.dart';
 import 'package:blissnest/presentation/screens/resources.dart';
@@ -19,6 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // List of screens for the different tabs
   final List<Widget> _screens = [
     const HomeTab(),
+    const ChatTab(),
     const AppointmentsTab(),
     const JournalTab(),
     const ResourceTab(),
@@ -60,6 +62,10 @@ class _HomeScreenState extends State<HomeScreen> {
             BottomNavigationBarItem(
               icon: FaIcon(FontAwesomeIcons.house),
               label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: FaIcon(FontAwesomeIcons.message),
+              label: 'Chat',
             ),
             BottomNavigationBarItem(
               icon: FaIcon(FontAwesomeIcons.calendarCheck),
