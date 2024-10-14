@@ -1,12 +1,16 @@
 import 'dart:convert';
+import 'package:blissnest/model/login_model.dart';
 import 'package:blissnest/model/user.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthProvider with ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   String? _success;
+
+  final baseUrl = "http://192.168.0.192:3001/api/auth";
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -19,7 +23,6 @@ class AuthProvider with ChangeNotifier {
 
     notifyListeners(); // Notify listeners to show loading spinner or other UI changes
 
-    const baseUrl = "http://192.168.1.212:3001/api/auth"; // Backend URL
     final url = Uri.parse('$baseUrl/register'); // Full registration endpoint
 
     try {
@@ -46,5 +49,36 @@ class AuthProvider with ChangeNotifier {
 
     _isLoading = false; // Stop the loading process
     notifyListeners(); // Notify listeners to hide the spinner or update the UI
+  }
+
+  Future<void> loginUser(UserLoginModel user, BuildContext context) async {
+    _isLoading = true;
+    _errorMessage = null; // Reset error message
+    _success = null; // Reset success message
+    notifyListeners();
+
+    final url = Uri.parse('$baseUrl/login');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(user.toJson()),
+      );
+
+      if (response.statusCode == 200) {
+        _success = "login successful";
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setBool("key", true);
+      } else {
+        final responseData = jsonDecode(response.body);
+        _errorMessage = responseData['message'];
+      }
+    } catch (error) {
+      _errorMessage = 'Could not log in. Please try again later.';
+    }
+
+    _isLoading = false;
+    notifyListeners();
   }
 }
