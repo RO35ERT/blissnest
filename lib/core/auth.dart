@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'package:blissnest/model/login_model.dart';
 import 'package:blissnest/model/user.dart';
+import 'package:blissnest/model/user_model.dart';
+import 'package:blissnest/utils/constants.dart';
+import 'package:blissnest/utils/request.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,8 +12,6 @@ class AuthProvider with ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   String? _success;
-
-  final baseUrl = "http://192.168.0.192:3001/api/auth";
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -23,7 +24,8 @@ class AuthProvider with ChangeNotifier {
 
     notifyListeners(); // Notify listeners to show loading spinner or other UI changes
 
-    final url = Uri.parse('$baseUrl/register'); // Full registration endpoint
+    final url =
+        Uri.parse('$baseUrl/auth/register'); // Full registration endpoint
 
     try {
       // Send HTTP POST request to register user
@@ -57,7 +59,7 @@ class AuthProvider with ChangeNotifier {
     _success = null; // Reset success message
     notifyListeners();
 
-    final url = Uri.parse('$baseUrl/login');
+    final url = Uri.parse('$baseUrl/auth/login');
 
     try {
       final response = await http.post(
@@ -67,9 +69,16 @@ class AuthProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        _success = "login successful";
+        _success = "";
+        final responseData = jsonDecode(response.body);
+
+        // Extract access token
+        final String accessToken = responseData['accessToken'];
+        final String refreshToken = responseData['refreshToken'];
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         prefs.setBool("key", true);
+        prefs.setString("access", accessToken);
+        prefs.setString("refresh", refreshToken);
       } else {
         final responseData = jsonDecode(response.body);
         _errorMessage = responseData['message'];
@@ -80,5 +89,28 @@ class AuthProvider with ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  UserModel? _user;
+
+  UserModel? get user => _user;
+
+  Future<void> fetchCurrentUser(BuildContext context) async {
+    final response = await sendHttpRequestWithAuth(
+      method: 'GET',
+      endpoint: '$baseUrl/auth/user',
+      context: context,
+    );
+
+    if (response != null && response.statusCode == 200) {
+      // Parse the response
+      final responseData = jsonDecode(response.body);
+      // Assuming you have a UserModel that matches your user data structure
+      _user = UserModel.fromJson(responseData);
+      notifyListeners();
+    } else {
+      // Handle error
+      print('Failed to fetch user: ${response?.statusCode}');
+    }
   }
 }

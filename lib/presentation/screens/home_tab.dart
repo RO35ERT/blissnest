@@ -1,5 +1,8 @@
+import 'package:blissnest/core/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../theme/colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -11,6 +14,15 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<AuthProvider>(context, listen: false)
+          .fetchCurrentUser(context);
+    });
+  }
+
   final List<String> _affirmations = [
     '“Believe in yourself and all that you are.”',
     '“You are stronger than you think.”',
@@ -40,6 +52,7 @@ class _HomeTabState extends State<HomeTab> {
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<AuthProvider>(context).user;
     return SafeArea(
       child: Scaffold(
         backgroundColor: backgroundColor,
@@ -54,14 +67,23 @@ class _HomeTabState extends State<HomeTab> {
                   mainAxisAlignment: MainAxisAlignment
                       .spaceBetween, // Aligns items on the same line
                   children: [
-                    const Text(
-                      'Hello, John Doe',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: peachColor,
-                      ),
-                    ),
+                    user != null
+                        ? Text(
+                            'Hello, ${user.name}',
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: peachColor,
+                            ),
+                          )
+                        : const Text(
+                            'Hello, John Doe',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: peachColor,
+                            ),
+                          ),
                     ElevatedButton.icon(
                       onPressed: () {
                         // Implement logout functionality
@@ -276,14 +298,9 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
-  void _logout() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Logged out successfully!'),
-      ),
-    );
-
-    // Navigate to the login screen (example)
+  void _logout() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove("key");
     Navigator.pushReplacementNamed(context, '/');
   }
 
