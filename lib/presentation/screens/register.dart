@@ -48,9 +48,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       password: _passwordController.text,
       role: "Patient",
     );
-
-    // Call register function in AuthProvider
-    Provider.of<AuthProvider>(context, listen: false).registerUser(user);
   }
 
   @override

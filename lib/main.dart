@@ -7,14 +7,7 @@ import 'theme/colors.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
-      ],
-      child: const BlissNestApp(),
-    ),
-  );
+  runApp(const BlissNestApp());
 }
 
 class BlissNestApp extends StatelessWidget {

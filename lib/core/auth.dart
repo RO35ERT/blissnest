@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AuthProvider with ChangeNotifier {
+class AuthProvider {
   bool _isLoading = false;
   String? _errorMessage;
   String? _success;
@@ -21,8 +21,6 @@ class AuthProvider with ChangeNotifier {
     _isLoading = true; // Start the loading process
     _errorMessage = null; // Clear any previous errors
     _success = null;
-
-    notifyListeners(); // Notify listeners to show loading spinner or other UI changes
 
     final url =
         Uri.parse('$baseUrl/auth/register'); // Full registration endpoint
@@ -50,14 +48,12 @@ class AuthProvider with ChangeNotifier {
     }
 
     _isLoading = false; // Stop the loading process
-    notifyListeners(); // Notify listeners to hide the spinner or update the UI
   }
 
   Future<void> loginUser(UserLoginModel user, BuildContext context) async {
     _isLoading = true;
     _errorMessage = null; // Reset error message
     _success = null; // Reset success message
-    notifyListeners();
 
     final url = Uri.parse('$baseUrl/auth/login');
 
@@ -88,7 +84,6 @@ class AuthProvider with ChangeNotifier {
     }
 
     _isLoading = false;
-    notifyListeners();
   }
 
   UserModel? _user;
@@ -107,7 +102,6 @@ class AuthProvider with ChangeNotifier {
       final responseData = jsonDecode(response.body);
       // Assuming you have a UserModel that matches your user data structure
       _user = UserModel.fromJson(responseData);
-      notifyListeners();
     } else {
       // Handle error
       print('Failed to fetch user: ${response?.statusCode}');
