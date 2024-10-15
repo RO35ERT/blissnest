@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:blissnest/model/login_model.dart';
 import 'package:blissnest/model/user.dart';
 import 'package:blissnest/model/user_model.dart';
+import 'package:blissnest/model/user_response.dart';
 import 'package:blissnest/utils/constants.dart';
 import 'package:blissnest/utils/request.dart';
 import 'package:http/http.dart' as http;
@@ -66,11 +67,13 @@ class AuthService {
         // Extract access token
         final String accessToken = responseData['accessToken'];
         final String refreshToken = responseData['refreshToken'];
+        final int id = responseData['id'];
 
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         prefs.setBool("key", true);
         prefs.setString("access", accessToken);
         prefs.setString("refresh", refreshToken);
+        prefs.setInt("id", id);
 
         return "Login Successful";
       } else {
@@ -99,7 +102,7 @@ class AuthService {
     }
   }
 
-  Future<List<UserModel>?> fetchNonPatients() async {
+  Future<List<UserResponseModel>?> fetchNonPatients() async {
     final response = await sendHttpRequestWithAuth(
       method: 'GET',
       endpoint: '$baseUrl/auth/non-patients',
@@ -108,7 +111,9 @@ class AuthService {
     if (response != null && response.statusCode == 200) {
       final List<dynamic> responseData = jsonDecode(response.body);
       // Convert the response to a list of UserModel instances
-      return responseData.map((user) => UserModel.fromJson(user)).toList();
+      return responseData
+          .map((user) => UserResponseModel.fromJson(user))
+          .toList();
     } else {
       return null; // Handle failure
     }

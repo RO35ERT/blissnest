@@ -3,8 +3,6 @@ import 'package:blissnest/model/appointment.dart';
 import 'package:blissnest/utils/constants.dart';
 import 'package:blissnest/utils/request.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class AppointmentService {
   /// Create a new appointment

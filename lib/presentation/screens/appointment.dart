@@ -1,29 +1,14 @@
+import 'dart:ffi';
+
+import 'package:blissnest/core/appointment.dart';
+import 'package:blissnest/core/auth.dart';
+import 'package:blissnest/model/appointment.dart';
+import 'package:blissnest/model/user_model.dart';
+import 'package:blissnest/model/user_response.dart';
 import 'package:blissnest/theme/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // Ensure to add the font_awesome_flutter package
-
-class Therapist {
-  final String id;
-  final String name;
-
-  Therapist({required this.id, required this.name});
-}
-
-class Appointment {
-  String title;
-  DateTime date;
-  String therapist;
-  String description;
-  String status;
-
-  Appointment({
-    required this.title,
-    required this.date,
-    required this.therapist,
-    required this.description,
-    required this.status,
-  });
-}
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Ensure to add the font_awesome_flutter package
 
 class AppointmentsTab extends StatefulWidget {
   const AppointmentsTab({super.key});
@@ -33,15 +18,49 @@ class AppointmentsTab extends StatefulWidget {
 }
 
 class _AppointmentsTabState extends State<AppointmentsTab> {
-  final List<Appointment> _appointments =
-      []; // List to hold appointment entries
-  final List<Therapist> _therapists = [
-    Therapist(id: '1', name: 'Dr. John Smith'),
-    Therapist(id: '2', name: 'Dr. Jane Doe'),
-    Therapist(id: '3', name: 'Dr. Emily Johnson'),
-  ];
+  final List<Appointment> _appointments = [];
+  final List<UserResponseModel> _therapists = []; // List to hold therapists
+  int? selectedTherapist;
+  int patient = 0;
+  DateTime? selectedDate;
+  final AppointmentService _appointmentService = AppointmentService();
+  final AuthService _authService = AuthService();
 
-  String? selectedTherapist;
+  @override
+  void initState() {
+    super.initState();
+    setId();
+    _fetchAppointments(); // Fetch existing appointments
+    _fetchTherapists(); // Fetch therapists who are non-patients
+  }
+
+  void setId() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      patient = prefs.getInt("id") ?? 0;
+    });
+  }
+
+  Future<void> _fetchAppointments() async {
+    final appointments = await _appointmentService.getAppointmentsByPatientId(
+        patientId: patient, context: context);
+    if (appointments != null) {
+      setState(() {
+        _appointments.clear();
+        _appointments.addAll(appointments);
+      });
+    }
+  }
+
+  Future<void> _fetchTherapists() async {
+    final therapists = await _authService.fetchNonPatients();
+    if (therapists != null) {
+      setState(() {
+        _therapists.clear();
+        _therapists.addAll(therapists);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +79,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                   color: peachColor,
                 ),
               ),
-              const SizedBox(height: 20), // Space below the title
+              const SizedBox(height: 20),
               Expanded(
                 child: ListView.builder(
                   itemCount: _appointments.length,
@@ -75,8 +94,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                   backgroundColor: MaterialStateProperty.all(peachColor),
                 ),
                 onPressed: () {
-                  _showAppointmentDialog(
-                      context); // Show dialog for adding new appointment
+                  _showAppointmentDialog(context);
                 },
                 child: const Text('Add Appointment'),
               ),
@@ -118,11 +136,6 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
             ),
             const SizedBox(height: 5),
             Text(
-              'Therapist: ${appointment.therapist}',
-              style: const TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 5),
-            Text(
               appointment.description,
               style: const TextStyle(color: Colors.black),
             ),
@@ -139,9 +152,11 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                 ),
                 IconButton(
                   icon: const Icon(FontAwesomeIcons.trash, color: Colors.red),
-                  onPressed: () {
+                  onPressed: () async {
+                    await _appointmentService.deleteAppointment(
+                        id: appointment.id, context: context);
                     setState(() {
-                      _appointments.removeAt(index); // Remove the appointment
+                      _appointments.removeAt(index);
                     });
                   },
                 ),
@@ -166,7 +181,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
 
     // Reset selectedTherapist to the current appointment's therapist if editing
     if (appointment != null) {
-      selectedTherapist = appointment.therapist;
+      selectedTherapist = 0;
     }
 
     showDialog(
@@ -189,7 +204,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 15), // Space below the title
+                const SizedBox(height: 15),
                 TextField(
                   controller: titleController,
                   decoration: const InputDecoration(
@@ -200,22 +215,23 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                 const SizedBox(height: 10),
                 DropdownButton<String>(
                   hint: const Text("Select Therapist"),
-                  value: selectedTherapist,
-                  items: _therapists.map((Therapist therapist) {
+                  value: selectedTherapist.toString(),
+                  items: _therapists.map((UserResponseModel therapist) {
                     return DropdownMenuItem<String>(
-                      value: therapist.name,
+                      value:
+                          therapist.id.toString(), // Assuming name field exists
                       child: Text(therapist.name),
                     );
                   }).toList(),
                   onChanged: (String? newValue) {
                     setState(() {
-                      selectedTherapist = newValue; // Update selected therapist
+                      selectedTherapist = int.parse(newValue!);
                     });
                   },
                 ),
                 const SizedBox(height: 10),
                 TextField(
-                  readOnly: true, // Make the TextField read-only
+                  readOnly: true,
                   controller: dateController,
                   decoration: const InputDecoration(
                     hintText: 'Date (Tap to select)',
@@ -233,28 +249,37 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                     border: OutlineInputBorder(),
                   ),
                 ),
-                const SizedBox(height: 20), // Space below the dropdown
+                const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: () {
-                        final newAppointment = Appointment(
-                          title: titleController.text,
-                          date: selectedDate,
-                          therapist:
-                              selectedTherapist ?? "No therapist selected",
-                          description: descriptionController.text,
-                          status: status,
-                        );
-
-                        setState(() {
-                          if (index == null) {
-                            _appointments.add(newAppointment);
-                          } else {
-                            _appointments[index] = newAppointment;
-                          }
-                        });
+                      onPressed: () async {
+                        if (index == null) {
+                          // Add new appointment
+                          final newAppointment =
+                              await _appointmentService.createAppointment(
+                                  title: titleController.text,
+                                  date: selectedDate,
+                                  patientId: patient,
+                                  doctorId: selectedTherapist!,
+                                  context: context,
+                                  description: descriptionController.text);
+                          setState(() {
+                            _appointments.add(newAppointment!);
+                          });
+                        } else {
+                          final newA =
+                              await _appointmentService.updateAppointment(
+                                  id: "0",
+                                  title: titleController.text,
+                                  date: selectedDate,
+                                  context: context,
+                                  description: descriptionController.text);
+                          setState(() {
+                            _appointments[index] = newA!;
+                          });
+                        }
 
                         Navigator.of(context).pop();
                       },
@@ -287,6 +312,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
 
     if (pickedDate != null) {
       setState(() {
+        selectedDate = pickedDate; // Update selected date
         dateController.text =
             pickedDate.toLocal().toString().split(' ')[0]; // Format the date
       });
