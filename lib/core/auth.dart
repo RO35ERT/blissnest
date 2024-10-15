@@ -4,11 +4,10 @@ import 'package:blissnest/model/user.dart';
 import 'package:blissnest/model/user_model.dart';
 import 'package:blissnest/utils/constants.dart';
 import 'package:blissnest/utils/request.dart';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AuthProvider {
+class AuthService {
   bool _isLoading = false;
   String? _errorMessage;
   String? _success;
@@ -17,43 +16,40 @@ class AuthProvider {
   String? get errorMessage => _errorMessage;
   String? get success => _success;
 
-  Future<void> registerUser(UserRegisterModel user) async {
-    _isLoading = true; // Start the loading process
-    _errorMessage = null; // Clear any previous errors
+  /// Register a new user
+  Future<String?> registerUser(UserRegisterModel user) async {
+    _isLoading = true;
+    _errorMessage = null;
     _success = null;
 
-    final url =
-        Uri.parse('$baseUrl/auth/register'); // Full registration endpoint
+    final url = Uri.parse('$baseUrl/auth/register');
 
     try {
-      // Send HTTP POST request to register user
       final response = await http.post(
         url,
-        headers: {
-          'Content-Type': 'application/json'
-        }, // Setting the content type to JSON
-        body: jsonEncode(user.toJson()), // Convert user model to JSON
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(user.toJson()),
       );
 
-      // Check for successful registration
       if (response.statusCode == 201) {
-        _success = "Account Created";
+        return "Account Created";
       } else {
         final responseData = jsonDecode(response.body);
-        _errorMessage =
-            responseData['message'] ?? 'Registration failed. Please try again.';
+        return responseData['message'] ??
+            'Registration failed. Please try again.';
       }
     } catch (error) {
-      _errorMessage = 'Could not register user. Please try again later.';
+      return 'Could not register user. Please try again later.';
+    } finally {
+      _isLoading = false;
     }
-
-    _isLoading = false; // Stop the loading process
   }
 
-  Future<void> loginUser(UserLoginModel user, BuildContext context) async {
+  /// Login the user
+  Future<String?> loginUser(UserLoginModel user) async {
     _isLoading = true;
-    _errorMessage = null; // Reset error message
-    _success = null; // Reset success message
+    _errorMessage = null;
+    _success = null;
 
     final url = Uri.parse('$baseUrl/auth/login');
 
@@ -65,46 +61,41 @@ class AuthProvider {
       );
 
       if (response.statusCode == 200) {
-        _success = "";
         final responseData = jsonDecode(response.body);
 
         // Extract access token
         final String accessToken = responseData['accessToken'];
         final String refreshToken = responseData['refreshToken'];
+
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         prefs.setBool("key", true);
         prefs.setString("access", accessToken);
         prefs.setString("refresh", refreshToken);
+
+        return "Login Successful";
       } else {
         final responseData = jsonDecode(response.body);
-        _errorMessage = responseData['message'];
+        return responseData['message'];
       }
     } catch (error) {
-      _errorMessage = 'Could not log in. Please try again later.';
+      return 'Could not log in. Please try again later.';
+    } finally {
+      _isLoading = false;
     }
-
-    _isLoading = false;
   }
 
-  UserModel? _user;
-
-  UserModel? get user => _user;
-
-  Future<void> fetchCurrentUser(BuildContext context) async {
+  /// Fetch current logged-in user
+  Future<UserModel?> fetchCurrentUser() async {
     final response = await sendHttpRequestWithAuth(
       method: 'GET',
       endpoint: '$baseUrl/auth/user',
-      context: context,
     );
 
     if (response != null && response.statusCode == 200) {
-      // Parse the response
       final responseData = jsonDecode(response.body);
-      // Assuming you have a UserModel that matches your user data structure
-      _user = UserModel.fromJson(responseData);
+      return UserModel.fromJson(responseData);
     } else {
-      // Handle error
-      print('Failed to fetch user: ${response?.statusCode}');
+      return null; // Handle failure
     }
   }
 }

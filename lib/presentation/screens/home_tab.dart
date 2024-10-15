@@ -1,4 +1,5 @@
 import 'package:blissnest/core/auth.dart';
+import 'package:blissnest/model/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
@@ -14,12 +15,19 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
+  final AuthService _authService = AuthService();
+  UserModel? _user;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<AuthProvider>(context, listen: false)
-          .fetchCurrentUser(context);
+    _fetchUser();
+  }
+
+  Future<void> _fetchUser() async {
+    final user = await _authService.fetchCurrentUser();
+    setState(() {
+      _user = user;
     });
   }
 
@@ -52,7 +60,6 @@ class _HomeTabState extends State<HomeTab> {
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<AuthProvider>(context).user;
     return SafeArea(
       child: Scaffold(
         backgroundColor: backgroundColor,
@@ -67,9 +74,9 @@ class _HomeTabState extends State<HomeTab> {
                   mainAxisAlignment: MainAxisAlignment
                       .spaceBetween, // Aligns items on the same line
                   children: [
-                    user != null
+                    _user != null
                         ? Text(
-                            'Hello, ${user.name}',
+                            'Hello, ${_user?.name}',
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,

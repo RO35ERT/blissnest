@@ -24,6 +24,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  final AuthService _authService = AuthService();
+
+  bool _isLoading = false;
+  String? _errorMessage;
+  String? _success;
+
   @override
   void dispose() {
     // Dispose of the controllers when the widget is disposed
@@ -37,7 +43,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  void _submitForm(BuildContext context) {
+  Future<void> _submitForm() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     final user = UserRegisterModel(
       nrc: _nrcController.text,
       name: _nameController.text,
@@ -48,16 +58,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
       password: _passwordController.text,
       role: "Patient",
     );
+
+    final result = await _authService.registerUser(user);
+
+    if (result == "Account Created") {
+      _success = result;
+    } else {
+      setState(() {
+        _errorMessage = result;
+      });
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: authProvider.isLoading
+          child: _isLoading
               ? const Center(
                   child: CircularProgressIndicator(),
                 )
@@ -269,29 +292,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                         onPressed: () {
-                          _submitForm(context);
+                          _submitForm();
                         },
                         child: Text('Register', style: AppTextStyles.button),
                       ),
                     ),
 
-                    if (!authProvider.isLoading)
+                    if (!_isLoading)
                       Padding(
                         padding: const EdgeInsets.only(top: 16.0),
                         child: Center(
                           // Check if success is not null, otherwise display error message
-                          child: authProvider.success != null
+                          child: _success != null
                               ? Text(
-                                  authProvider.success!,
+                                  _success!,
                                   style: const TextStyle(
                                     color: Colors.green,
                                     fontSize: 16.0,
                                   ),
                                 )
-                              : authProvider.errorMessage !=
-                                      null // Check for error message
+                              : _errorMessage != null // Check for error message
                                   ? Text(
-                                      authProvider.errorMessage!,
+                                      _errorMessage!,
                                       style: const TextStyle(
                                         color: Colors.red,
                                         fontSize: 16.0,
