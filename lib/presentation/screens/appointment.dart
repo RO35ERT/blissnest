@@ -53,7 +53,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
   }
 
   Future<void> _fetchTherapists() async {
-    final therapists = await _authService.fetchNonPatients();
+    final therapists = await _authService.fetchNonPatients(context);
     print(therapists);
     if (therapists != null) {
       setState(() {
@@ -177,7 +177,6 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
         text: appointment?.date.toLocal().toString().split(' ')[0]);
     final TextEditingController descriptionController =
         TextEditingController(text: appointment?.description);
-    String status = appointment?.status ?? 'pending';
     DateTime selectedDate = appointment?.date ?? DateTime.now();
 
     // Reset selectedTherapist to the current appointment's therapist if editing
@@ -214,19 +213,18 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                DropdownButton<String>(
+                DropdownButton<int>(
                   hint: const Text("Select Therapist"),
-                  value: selectedTherapist.toString(),
+                  value: selectedTherapist,
                   items: _therapists.map((UserResponseModel therapist) {
-                    return DropdownMenuItem<String>(
-                      value:
-                          therapist.id.toString(), // Assuming name field exists
+                    return DropdownMenuItem<int>(
+                      value: therapist.id, // Assuming name field exists
                       child: Text(therapist.name),
                     );
                   }).toList(),
-                  onChanged: (String? newValue) {
+                  onChanged: (int? newValue) {
                     setState(() {
-                      selectedTherapist = int.parse(newValue!);
+                      selectedTherapist = newValue!;
                     });
                   },
                 ),

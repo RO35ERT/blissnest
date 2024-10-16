@@ -14,9 +14,10 @@ class AppointmentService {
     required int patientId,
     required BuildContext context,
   }) async {
+    print(description);
     final response = await sendHttpRequestWithAuth(
       method: 'POST',
-      endpoint: '$baseUrl/appointments/user',
+      endpoint: '$baseUrl/appointment/user',
       body: {
         'title': title,
         'date': date.toIso8601String(),
@@ -44,7 +45,7 @@ class AppointmentService {
   }) async {
     final response = await sendHttpRequestWithAuth(
       method: 'GET',
-      endpoint: '$baseUrl/appointment/get/patient',
+      endpoint: '$baseUrl/appointment/get',
       context: context,
     );
 
@@ -68,7 +69,7 @@ class AppointmentService {
   }) async {
     final response = await sendHttpRequestWithAuth(
       method: 'PUT',
-      endpoint: '$baseUrl/appointments/$id',
+      endpoint: '$baseUrl/appointment/$id',
       body: {
         'title': title,
         'date': date.toIso8601String(),
@@ -94,7 +95,7 @@ class AppointmentService {
   }) async {
     final response = await sendHttpRequestWithAuth(
       method: 'DELETE',
-      endpoint: '$baseUrl/appointments/$id',
+      endpoint: '$baseUrl/appointment/$id',
       context: context,
     );
 
