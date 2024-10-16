@@ -30,6 +30,8 @@ Future<http.Response?> sendHttpRequestWithAuth({
   };
 
   final url = Uri.parse(endpoint);
+
+  print(url);
   http.Response? response;
 
   try {

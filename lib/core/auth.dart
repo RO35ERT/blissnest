@@ -104,9 +104,8 @@ class AuthService {
   Future<List<UserResponseModel>?> fetchNonPatients() async {
     final response = await sendHttpRequestWithAuth(
       method: 'GET',
-      endpoint: '$baseUrl/auth/non-patients',
+      endpoint: '$baseUrl/auth/get/non-patients',
     );
-
     if (response != null && response.statusCode == 200) {
       final List<dynamic> responseData = jsonDecode(response.body);
       // Convert the response to a list of UserModel instances

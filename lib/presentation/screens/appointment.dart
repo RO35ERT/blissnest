@@ -21,7 +21,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
   final List<Appointment> _appointments = [];
   final List<UserResponseModel> _therapists = []; // List to hold therapists
   int? selectedTherapist;
-  int patient = 4;
+  int patient = 3;
   DateTime? selectedDate;
   final AppointmentService _appointmentService = AppointmentService();
   final AuthService _authService = AuthService();
@@ -30,8 +30,8 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
   void initState() {
     super.initState();
     setId();
-    _fetchAppointments(); // Fetch existing appointments
-    _fetchTherapists(); // Fetch therapists who are non-patients
+    _fetchTherapists();
+    _fetchAppointments();
   }
 
   void setId() async {
@@ -54,6 +54,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
 
   Future<void> _fetchTherapists() async {
     final therapists = await _authService.fetchNonPatients();
+    print(therapists);
     if (therapists != null) {
       setState(() {
         _therapists.clear();
