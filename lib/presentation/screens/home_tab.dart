@@ -25,7 +25,7 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   Future<void> _fetchUser() async {
-    final user = await _authService.fetchCurrentUser();
+    final user = await _authService.fetchCurrentUser(context);
     setState(() {
       _user = user;
     });

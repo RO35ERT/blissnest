@@ -5,6 +5,7 @@ import 'package:blissnest/model/user_model.dart';
 import 'package:blissnest/model/user_response.dart';
 import 'package:blissnest/utils/constants.dart';
 import 'package:blissnest/utils/request.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -88,11 +89,9 @@ class AuthService {
   }
 
   /// Fetch current logged-in user
-  Future<UserModel?> fetchCurrentUser() async {
+  Future<UserModel?> fetchCurrentUser(BuildContext context) async {
     final response = await sendHttpRequestWithAuth(
-      method: 'GET',
-      endpoint: '$baseUrl/auth/user',
-    );
+        method: 'GET', endpoint: '$baseUrl/auth/user', context: context);
 
     if (response != null && response.statusCode == 200) {
       final responseData = jsonDecode(response.body);

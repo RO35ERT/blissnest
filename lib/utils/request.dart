@@ -15,6 +15,14 @@ Future<http.Response?> sendHttpRequestWithAuth({
   final String? accessToken = prefs.getString("access");
   final String? refreshToken = prefs.getString("refresh");
 
+  if (accessToken == null || refreshToken == null) {
+    print('Error: Access or refresh token is null.');
+    if (context != null) {
+      Navigator.pushReplacementNamed(context, '/'); // Navigate to login
+    }
+    return null;
+  }
+
   // Create headers with the Authorization token
   final headers = {
     'Content-Type': 'application/json',
@@ -22,7 +30,6 @@ Future<http.Response?> sendHttpRequestWithAuth({
   };
 
   final url = Uri.parse(endpoint);
-
   http.Response? response;
 
   try {
@@ -55,12 +62,7 @@ Future<http.Response?> sendHttpRequestWithAuth({
         break;
     }
 
-    // Check for authorization issues
-    if (response.statusCode == 403) {
-      // Forbidden, navigate to login
-      Navigator.pushReplacementNamed(context!, '/');
-      return null;
-    } else if (response.statusCode == 401) {
+    if (response.statusCode == 401 || response.statusCode == 403) {
       // Unauthorized, attempt to refresh the token
       final refreshResponse = await refreshAccessToken(refreshToken!, context!);
 
@@ -97,10 +99,10 @@ Future<http.Response?> sendHttpRequestWithAuth({
             break;
         }
       } else {
+        Navigator.pushReplacementNamed(context, '/');
         return null; // Refresh failed, user is redirected to login
       }
     }
-
     return response; // Return the final response
   } catch (error) {
     print('Error making HTTP request: $error');
@@ -110,7 +112,13 @@ Future<http.Response?> sendHttpRequestWithAuth({
 
 // Function to refresh access token
 Future<Map<String, String>?> refreshAccessToken(
-    String refreshToken, BuildContext context) async {
+    String? refreshToken, BuildContext context) async {
+  if (refreshToken == null) {
+    print('Error: Refresh token is null.');
+    Navigator.pushReplacementNamed(context, '/'); // Redirect to login
+    return null;
+  }
+
   final url = Uri.parse('$baseUrl/auth/refresh');
   final SharedPreferences prefs = await SharedPreferences.getInstance();
 
