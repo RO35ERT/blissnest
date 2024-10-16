@@ -255,7 +255,7 @@ class _HomeTabState extends State<HomeTab> {
                   ),
                 ),
                 Row(
-                  // mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     TextButton(
                       onPressed: () {
