@@ -21,7 +21,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
   final List<Appointment> _appointments = [];
   final List<UserResponseModel> _therapists = []; // List to hold therapists
   int? selectedTherapist;
-  int patient = 0;
+  int patient = 4;
   DateTime? selectedDate;
   final AppointmentService _appointmentService = AppointmentService();
   final AuthService _authService = AuthService();
@@ -37,7 +37,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
   void setId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      patient = prefs.getInt("id") ?? 0;
+      patient = prefs.getInt("id") ?? 3;
     });
   }
 

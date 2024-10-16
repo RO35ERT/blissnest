@@ -262,33 +262,33 @@ class _HomeTabState extends State<HomeTab> {
                         _launchInWebView('1234567890');
                       },
                       child: const Text(
-                        '123-456-7890',
+                        'Emergency',
                         style: TextStyle(
                           fontSize: 16,
                           color: peachColor,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 10),
                     TextButton(
                       onPressed: () {
                         _launchInWebView('0987654321');
                       },
                       child: const Text(
-                        '098-765-4321',
+                        'Call Center',
                         style: TextStyle(
                           fontSize: 16,
                           color: peachColor,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 10),
                     TextButton(
                       onPressed: () {
                         _launchInWebView('1112223333');
                       },
                       child: const Text(
-                        '111-222-3333',
+                        'Customer Care',
                         style: TextStyle(
                           fontSize: 16,
                           color: peachColor,

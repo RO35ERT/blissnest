@@ -44,7 +44,7 @@ class AppointmentService {
   }) async {
     final response = await sendHttpRequestWithAuth(
       method: 'GET',
-      endpoint: '$baseUrl/appointments/patients/$patientId',
+      endpoint: '$baseUrl/appointment/patient',
       context: context,
     );
 
