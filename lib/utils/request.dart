@@ -99,6 +99,8 @@ Future<http.Response?> sendHttpRequestWithAuth({
             break;
         }
       } else {
+        prefs.remove("access");
+        prefs.remove("refresh");
         Navigator.pushReplacementNamed(context, '/');
         return null; // Refresh failed, user is redirected to login
       }
