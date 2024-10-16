@@ -90,7 +90,7 @@ class AppointmentService {
 
   /// Delete an appointment
   Future<bool> deleteAppointment({
-    required String id,
+    required int id,
     required BuildContext context,
   }) async {
     final response = await sendHttpRequestWithAuth(

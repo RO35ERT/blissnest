@@ -1,5 +1,5 @@
 class Appointment {
-  final String id;
+  final int id;
   final String title;
   final DateTime date;
   final String status;
