@@ -286,7 +286,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                     ),
                     TextButton(
                       onPressed: () {
-                        Navigator.of(context).pop(); // Close the dialog
+                        Navigator.of(context).pop();
                       },
                       child: const Text('Cancel'),
                     ),
