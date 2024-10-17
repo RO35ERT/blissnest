@@ -119,7 +119,10 @@ class _JournalTabState extends State<JournalTab> {
                   },
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete),
+                  icon: const Icon(
+                    Icons.delete,
+                    color: Colors.red,
+                  ),
                   onPressed: () async {
                     final success = await _journalService.deleteJournal(
                       id: entry
