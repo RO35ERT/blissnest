@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:blissnest/model/login_model.dart';
+import 'package:blissnest/model/therapist.dart';
 import 'package:blissnest/model/user.dart';
 import 'package:blissnest/model/user_model.dart';
 import 'package:blissnest/model/user_response.dart';
@@ -112,6 +113,19 @@ class AuthService {
       return responseData
           .map((user) => UserResponseModel.fromJson(user))
           .toList();
+    } else {
+      return null; // Handle failure
+    }
+  }
+
+  Future<List<TherapistModel>?> fetchTherapists(BuildContext context) async {
+    final response = await sendHttpRequestWithAuth(
+        method: 'GET', endpoint: '$baseUrl/auth/get', context: context);
+
+    if (response != null && response.statusCode == 200) {
+      final List<dynamic> responseData = jsonDecode(response.body);
+      // Convert the response to a list of UserModel instances
+      return responseData.map((user) => TherapistModel.fromJson(user)).toList();
     } else {
       return null; // Handle failure
     }

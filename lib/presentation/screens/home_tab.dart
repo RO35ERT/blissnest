@@ -1,6 +1,7 @@
 import 'package:blissnest/core/appointment.dart';
 import 'package:blissnest/core/auth.dart';
 import 'package:blissnest/model/appointment.dart';
+import 'package:blissnest/model/therapist.dart';
 import 'package:blissnest/model/user_model.dart';
 import 'package:blissnest/model/user_response.dart';
 import 'package:blissnest/utils/functions.dart';
@@ -19,7 +20,7 @@ class HomeTab extends StatefulWidget {
 
 class _HomeTabState extends State<HomeTab> {
   final List<Appointment> _appointments = [];
-  final List<UserResponseModel> _therapists = [];
+  final List<TherapistModel> _therapists = [];
   final AuthService _authService = AuthService();
   final AppointmentService _appointmentService = AppointmentService();
   int patient = 3;
@@ -52,7 +53,7 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   Future<void> _fetchTherapists() async {
-    final therapists = await _authService.fetchNonPatients(context);
+    final therapists = await _authService.fetchTherapists(context);
     if (therapists != null) {
       setState(() {
         _therapists.clear();
@@ -75,22 +76,6 @@ class _HomeTabState extends State<HomeTab> {
     '“You are enough just as you are.”',
     '“Do not let what you cannot do interfere with what you can do.”',
   ];
-
-  // final List<String> _appointments = [
-  //   'Appointment with Dr. Smith on 2024-10-10 at 10:00 AM',
-  //   'Appointment with Dr. Jones on 2024-10-12 at 2:00 PM',
-  // ];
-
-  // final List<Map<String, String>> _therapists = [
-  //   {"name": "Dr. Alice", "avatarUrl": "https://via.placeholder.com/150"},
-  //   {"name": "Dr. Bob", "avatarUrl": "https://via.placeholder.com/150"},
-  //   {"name": "Dr. Carol", "avatarUrl": "https://via.placeholder.com/150"},
-  //   {"name": "Dr. David", "avatarUrl": "https://via.placeholder.com/150"},
-  //   {"name": "Dr. Eve", "avatarUrl": "https://via.placeholder.com/150"},
-  //   {"name": "Dr. Gaos", "avatarUrl": "https://via.placeholder.com/150"},
-  //   {"name": "Dr. Self", "avatarUrl": "https://via.placeholder.com/150"},
-  //   {"name": "Dr. Snail", "avatarUrl": "https://via.placeholder.com/150"},
-  // ];
 
   final String _tipOfTheDay =
       'Take a 5-minute break every hour to stretch and reset your mind.';
@@ -273,21 +258,28 @@ class _HomeTabState extends State<HomeTab> {
                     scrollDirection: Axis.horizontal,
                     itemCount: _therapists.length,
                     itemBuilder: (context, index) {
-                      return Container(
-                        height: 60,
-                        margin: const EdgeInsets.only(right: 15),
-                        child: Column(
-                          children: [
-                            const CircleAvatar(
-                              backgroundColor: Colors.grey,
-                              radius: 30,
-                            ),
-                            const SizedBox(height: 3),
-                            Text(
-                              _therapists[index].name,
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                          ],
+                      return GestureDetector(
+                        onTap: () {
+                          // Show modal when avatar is clicked
+                          _showTherapistDetailsModal(
+                              context, _therapists[index]);
+                        },
+                        child: Container(
+                          height: 60,
+                          margin: const EdgeInsets.only(right: 15),
+                          child: Column(
+                            children: [
+                              const CircleAvatar(
+                                backgroundColor: Colors.grey,
+                                radius: 30,
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                _therapists[index].name,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
@@ -371,5 +363,75 @@ class _HomeTabState extends State<HomeTab> {
     } catch (e) {
       print(e.toString());
     }
+  }
+
+  void _showTherapistDetailsModal(
+      BuildContext context, TherapistModel therapist) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      ),
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Column(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Colors.grey,
+                      radius: 40,
+                      child: Text(
+                        therapist.name[0], // Display initial in the avatar
+                        style: const TextStyle(fontSize: 24),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      therapist.name,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Text(
+                  "Email: ${therapist.email}",
+                  style: const TextStyle(fontSize: 20),
+                ),
+              ), // Example details
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: GestureDetector(
+                  onTap: () => {_launchInWebView(therapist.phone)},
+                  child: Text("Phone: ${therapist.phone}",
+                      style: const TextStyle(fontSize: 20)),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Text("Qualification: ${therapist.qualification}",
+                    style: const TextStyle(fontSize: 20)),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Text("Facility: ${therapist.facility}",
+                    style: const TextStyle(fontSize: 20)),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
