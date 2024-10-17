@@ -3,6 +3,7 @@ import 'package:blissnest/core/auth.dart';
 import 'package:blissnest/model/appointment.dart';
 import 'package:blissnest/model/user_model.dart';
 import 'package:blissnest/model/user_response.dart';
+import 'package:blissnest/utils/functions.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -232,13 +233,23 @@ class _HomeTabState extends State<HomeTab> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    for (var appointment in _appointments)
-                      Container(
-                        color: Theme.of(context).primaryColor,
+                    for (var appointment in _appointments
+                        .take(2)
+                        .toList()
+                        .reversed) // Show last 2 appointments
+                      Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                              8), // Rounded corners for card
+                        ),
+                        elevation: 4, // Card elevation
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 10), // Spacing between cards
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          padding: const EdgeInsets.all(
+                              16.0), // Padding inside the card
                           child: Text(
-                            "${appointment.title} at ${appointment.date}",
+                            "${appointment.title} at ${formatDate(appointment.date)}",
                             style: const TextStyle(fontSize: 16),
                           ),
                         ),
