@@ -1,8 +1,10 @@
+import 'package:blissnest/core/appointment.dart';
 import 'package:blissnest/core/auth.dart';
+import 'package:blissnest/model/appointment.dart';
 import 'package:blissnest/model/user_model.dart';
+import 'package:blissnest/model/user_response.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../theme/colors.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -15,13 +17,47 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
+  final List<Appointment> _appointments = [];
+  final List<UserResponseModel> _therapists = [];
   final AuthService _authService = AuthService();
+  final AppointmentService _appointmentService = AppointmentService();
+  int patient = 3;
   UserModel? _user;
 
   @override
   void initState() {
     super.initState();
     _fetchUser();
+    _fetchAppointments();
+    _fetchTherapists();
+  }
+
+  void setId() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      patient = prefs.getInt("id") ?? 3;
+    });
+  }
+
+  Future<void> _fetchAppointments() async {
+    final appointments = await _appointmentService.getAppointmentsByPatientId(
+        patientId: patient, context: context);
+    if (appointments != null) {
+      setState(() {
+        _appointments.clear();
+        _appointments.addAll(appointments);
+      });
+    }
+  }
+
+  Future<void> _fetchTherapists() async {
+    final therapists = await _authService.fetchNonPatients(context);
+    if (therapists != null) {
+      setState(() {
+        _therapists.clear();
+        _therapists.addAll(therapists);
+      });
+    }
   }
 
   Future<void> _fetchUser() async {
@@ -39,21 +75,21 @@ class _HomeTabState extends State<HomeTab> {
     '“Do not let what you cannot do interfere with what you can do.”',
   ];
 
-  final List<String> _appointments = [
-    'Appointment with Dr. Smith on 2024-10-10 at 10:00 AM',
-    'Appointment with Dr. Jones on 2024-10-12 at 2:00 PM',
-  ];
+  // final List<String> _appointments = [
+  //   'Appointment with Dr. Smith on 2024-10-10 at 10:00 AM',
+  //   'Appointment with Dr. Jones on 2024-10-12 at 2:00 PM',
+  // ];
 
-  final List<Map<String, String>> _therapists = [
-    {"name": "Dr. Alice", "avatarUrl": "https://via.placeholder.com/150"},
-    {"name": "Dr. Bob", "avatarUrl": "https://via.placeholder.com/150"},
-    {"name": "Dr. Carol", "avatarUrl": "https://via.placeholder.com/150"},
-    {"name": "Dr. David", "avatarUrl": "https://via.placeholder.com/150"},
-    {"name": "Dr. Eve", "avatarUrl": "https://via.placeholder.com/150"},
-    {"name": "Dr. Gaos", "avatarUrl": "https://via.placeholder.com/150"},
-    {"name": "Dr. Self", "avatarUrl": "https://via.placeholder.com/150"},
-    {"name": "Dr. Snail", "avatarUrl": "https://via.placeholder.com/150"},
-  ];
+  // final List<Map<String, String>> _therapists = [
+  //   {"name": "Dr. Alice", "avatarUrl": "https://via.placeholder.com/150"},
+  //   {"name": "Dr. Bob", "avatarUrl": "https://via.placeholder.com/150"},
+  //   {"name": "Dr. Carol", "avatarUrl": "https://via.placeholder.com/150"},
+  //   {"name": "Dr. David", "avatarUrl": "https://via.placeholder.com/150"},
+  //   {"name": "Dr. Eve", "avatarUrl": "https://via.placeholder.com/150"},
+  //   {"name": "Dr. Gaos", "avatarUrl": "https://via.placeholder.com/150"},
+  //   {"name": "Dr. Self", "avatarUrl": "https://via.placeholder.com/150"},
+  //   {"name": "Dr. Snail", "avatarUrl": "https://via.placeholder.com/150"},
+  // ];
 
   final String _tipOfTheDay =
       'Take a 5-minute break every hour to stretch and reset your mind.';
@@ -197,11 +233,14 @@ class _HomeTabState extends State<HomeTab> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     for (var appointment in _appointments)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: Text(
-                          appointment,
-                          style: const TextStyle(fontSize: 16),
+                      Container(
+                        color: Theme.of(context).primaryColor,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: Text(
+                            "${appointment.title} at ${appointment.date}",
+                            style: const TextStyle(fontSize: 16),
+                          ),
                         ),
                       ),
                   ],
@@ -228,14 +267,13 @@ class _HomeTabState extends State<HomeTab> {
                         margin: const EdgeInsets.only(right: 15),
                         child: Column(
                           children: [
-                            CircleAvatar(
-                              backgroundImage: NetworkImage(
-                                  _therapists[index]['avatarUrl']!),
+                            const CircleAvatar(
+                              backgroundColor: Colors.grey,
                               radius: 30,
                             ),
                             const SizedBox(height: 3),
                             Text(
-                              _therapists[index]['name']!,
+                              _therapists[index].name,
                               style: const TextStyle(fontSize: 14),
                             ),
                           ],

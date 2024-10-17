@@ -1,9 +1,6 @@
-import 'dart:ffi';
-
 import 'package:blissnest/core/appointment.dart';
 import 'package:blissnest/core/auth.dart';
 import 'package:blissnest/model/appointment.dart';
-import 'package:blissnest/model/user_model.dart';
 import 'package:blissnest/model/user_response.dart';
 import 'package:blissnest/theme/colors.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +51,6 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
 
   Future<void> _fetchTherapists() async {
     final therapists = await _authService.fetchNonPatients(context);
-    print(therapists);
     if (therapists != null) {
       setState(() {
         _therapists.clear();
