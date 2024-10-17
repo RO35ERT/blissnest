@@ -1,19 +1,22 @@
 class JournalRequestModel {
-  final String text;
+  final int id; // ID of the journal entry
+  final String text; // Content of the journal entry
 
-  JournalRequestModel({required this.text});
+  JournalRequestModel({required this.id, required this.text});
 
-  // Converts a JournalRequestModel instance to JSON
+  // Converts a JournalResponseModel instance to JSON
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'text': text,
     };
   }
 
-  // Creates a JournalRequestModel instance from JSON
+  // Creates a JournalResponseModel instance from JSON
   factory JournalRequestModel.fromJson(Map<String, dynamic> json) {
     return JournalRequestModel(
-      text: json['text'],
+      id: json['id'], // Assuming the ID is an integer
+      text: json['text'], // Text content of the journal
     );
   }
 }

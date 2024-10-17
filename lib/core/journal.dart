@@ -53,7 +53,7 @@ class JournalService {
 
   /// Update an existing journal entry
   Future<JournalRequestModel?> updateJournal({
-    required int id,
+    required int? id,
     required String text,
     required BuildContext context,
   }) async {
@@ -78,7 +78,7 @@ class JournalService {
 
   /// Delete a journal entry
   Future<bool> deleteJournal({
-    required int id,
+    required int? id,
     required BuildContext context,
   }) async {
     final response = await sendHttpRequestWithAuth(

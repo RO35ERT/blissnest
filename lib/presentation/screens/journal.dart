@@ -122,7 +122,8 @@ class _JournalTabState extends State<JournalTab> {
                   icon: const Icon(Icons.delete),
                   onPressed: () async {
                     final success = await _journalService.deleteJournal(
-                      id: entry, // Assuming you have an ID in your response model
+                      id: entry
+                          .id, // Assuming you have an ID in your response model
                       context: context,
                     );
                     if (success) {
@@ -207,7 +208,7 @@ class _JournalTabState extends State<JournalTab> {
                           );
                           if (journalEntry != null) {
                             setState(() {
-                              _journalEntries.add(journalEntry);
+                              _fetchJournals();
                             });
                           }
                         } else {
@@ -221,7 +222,7 @@ class _JournalTabState extends State<JournalTab> {
                           );
                           if (updatedJournalEntry != null) {
                             setState(() {
-                              _journalEntries[index] = updatedJournalEntry;
+                              _fetchJournals();
                             });
                           }
                         }
