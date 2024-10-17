@@ -14,7 +14,6 @@ class AppointmentService {
     required int patientId,
     required BuildContext context,
   }) async {
-    print(description);
     final response = await sendHttpRequestWithAuth(
       method: 'POST',
       endpoint: '$baseUrl/appointment/user',
@@ -93,6 +92,7 @@ class AppointmentService {
     required int id,
     required BuildContext context,
   }) async {
+    print(id);
     final response = await sendHttpRequestWithAuth(
       method: 'DELETE',
       endpoint: '$baseUrl/appointment/$id',

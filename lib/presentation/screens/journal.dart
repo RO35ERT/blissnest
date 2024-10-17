@@ -1,5 +1,8 @@
+import 'dart:async';
+import 'package:blissnest/core/journal.dart';
 import 'package:flutter/material.dart';
 import '../../theme/colors.dart'; // Import your color theme
+import 'package:blissnest/model/journal_response.dart';
 
 class JournalTab extends StatefulWidget {
   const JournalTab({super.key});
@@ -9,7 +12,23 @@ class JournalTab extends StatefulWidget {
 }
 
 class _JournalTabState extends State<JournalTab> {
-  final List<String> _journalEntries = []; // Store journal entries
+  final JournalService _journalService = JournalService();
+  List<JournalResponseModel> _journalEntries = []; // Store journal entries
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchJournals(); // Fetch journal entries when the tab is initialized
+  }
+
+  Future<void> _fetchJournals() async {
+    final journals = await _journalService.getJournalsForUser(context: context);
+    if (journals != null) {
+      setState(() {
+        _journalEntries = journals;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +62,6 @@ class _JournalTabState extends State<JournalTab> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  // Placeholder for adding a new journal entry
                   _showJournalEntryDialog(context);
                 },
                 style: ElevatedButton.styleFrom(
@@ -64,7 +82,7 @@ class _JournalTabState extends State<JournalTab> {
   }
 
   Widget _buildJournalEntryCard(BuildContext context,
-      {required String entry, required int index}) {
+      {required JournalResponseModel entry, required int index}) {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
@@ -76,9 +94,17 @@ class _JournalTabState extends State<JournalTab> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              entry,
+              entry.text,
               style: const TextStyle(
                 fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Created at: ${entry.createdAt}',
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.grey,
               ),
             ),
             const SizedBox(height: 10),
@@ -88,18 +114,22 @@ class _JournalTabState extends State<JournalTab> {
                 IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: () {
-                    // Placeholder for editing the journal entry
                     _showJournalEntryDialog(context,
-                        entry: entry, index: index);
+                        entry: entry.text, index: index);
                   },
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    // Placeholder for deleting the journal entry
-                    setState(() {
-                      _journalEntries.removeAt(index);
-                    });
+                  onPressed: () async {
+                    final success = await _journalService.deleteJournal(
+                      id: entry, // Assuming you have an ID in your response model
+                      context: context,
+                    );
+                    if (success) {
+                      setState(() {
+                        _journalEntries.removeAt(index);
+                      });
+                    }
                   },
                 ),
               ],
@@ -167,15 +197,33 @@ class _JournalTabState extends State<JournalTab> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (index == null) {
-                          setState(() {
-                            _journalEntries.add(controller.text);
-                          });
+                          // Create new journal entry
+                          final journalEntry =
+                              await _journalService.createJournal(
+                            text: controller.text,
+                            context: context,
+                          );
+                          if (journalEntry != null) {
+                            setState(() {
+                              _journalEntries.add(journalEntry);
+                            });
+                          }
                         } else {
-                          setState(() {
-                            _journalEntries[index] = controller.text;
-                          });
+                          // Update existing journal entry
+                          final updatedJournalEntry =
+                              await _journalService.updateJournal(
+                            id: _journalEntries[index]
+                                .id, // Assuming you have an ID
+                            text: controller.text,
+                            context: context,
+                          );
+                          if (updatedJournalEntry != null) {
+                            setState(() {
+                              _journalEntries[index] = updatedJournalEntry;
+                            });
+                          }
                         }
                         Navigator.of(context).pop();
                       },

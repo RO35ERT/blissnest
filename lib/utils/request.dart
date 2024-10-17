@@ -31,6 +31,8 @@ Future<http.Response?> sendHttpRequestWithAuth({
 
   final url = Uri.parse(endpoint);
 
+  print(url);
+
   http.Response? response;
 
   try {
@@ -54,7 +56,6 @@ Future<http.Response?> sendHttpRequestWithAuth({
         response = await http.delete(
           url,
           headers: headers,
-          body: jsonEncode(body),
         );
         break;
       case 'GET':
@@ -91,7 +92,6 @@ Future<http.Response?> sendHttpRequestWithAuth({
             response = await http.delete(
               url,
               headers: headers,
-              body: jsonEncode(body),
             );
             break;
           case 'GET':
