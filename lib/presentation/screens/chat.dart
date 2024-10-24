@@ -3,6 +3,8 @@ import 'package:blissnest/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:blissnest/core/auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ChatMessage {
   String text;
@@ -23,12 +25,22 @@ class _ChatTabState extends State<ChatTab> {
   final AuthService _authService = AuthService();
   final List<TherapistModel> _therapists = [];
   final TextEditingController _messageController = TextEditingController();
-  TherapistModel? _selectedTherapist; // Track the selected therapist
+  TherapistModel? _selectedTherapist;
+  int patient = 3;
+  late IO.Socket socket;
 
   @override
   void initState() {
     super.initState();
     _fetchTherapists();
+    _connectSocket();
+  }
+
+  void setId() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      patient = prefs.getInt("id") ?? 3;
+    });
   }
 
   Future<void> _fetchTherapists() async {
@@ -39,6 +51,38 @@ class _ChatTabState extends State<ChatTab> {
         _therapists.addAll(therapists);
       });
     }
+  }
+
+  void _connectSocket() {
+    socket = IO.io('http://http://10.0.2.2:3001', <String, dynamic>{
+      'transports': ['websocket'],
+      'autoConnect': false,
+    });
+
+    socket.connect();
+
+    socket.on('connect', (_) {
+      print('Connected to socket server');
+    });
+
+    // Listen for incoming private messages
+    socket.on('private_message', (data) {
+      setState(() {
+        _messages.insert(
+            0, ChatMessage(text: data['message'], isSentByUser: false));
+      });
+    });
+
+    socket.on('disconnect', (_) {
+      print('Disconnected from socket server');
+    });
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    socket.dispose();
+    super.dispose();
   }
 
   @override
@@ -96,7 +140,6 @@ class _ChatTabState extends State<ChatTab> {
     );
   }
 
-  // Build therapist avatars in a horizontal list
   Widget _buildTherapistAvatarList() {
     return SizedBox(
       height: 80,
@@ -110,28 +153,28 @@ class _ChatTabState extends State<ChatTab> {
     );
   }
 
-  // Build each therapist avatar widget
   Widget _buildTherapistAvatar(TherapistModel therapist) {
     return GestureDetector(
       onTap: () {
         setState(() {
-          _selectedTherapist = therapist; // Select the therapist
-          _messages.clear(); // Clear chat when switching to a new therapist
+          _selectedTherapist = therapist;
+          _messages.clear();
         });
+        // Emit an event to identify the user with the server
+        socket.emit('identify', patient);
       },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 10),
         child: Column(
           children: [
             CircleAvatar(
-              backgroundColor:
-                  peachColor, // Or any color you prefer for the avatar background
+              backgroundColor: peachColor,
               radius: 25,
               child: Text(
-                therapist.name[0], // First letter of the therapist's name
+                therapist.name[0], // First letter of therapist's name
                 style: const TextStyle(
-                  color: Colors.white, // Set the text color
-                  fontSize: 18, // Adjust the font size as needed
+                  color: Colors.white,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -147,7 +190,6 @@ class _ChatTabState extends State<ChatTab> {
     );
   }
 
-  // Build each chat message bubble
   Widget _buildMessageBubble(ChatMessage message) {
     return Align(
       alignment:
@@ -156,10 +198,7 @@ class _ChatTabState extends State<ChatTab> {
         margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: message.isSentByUser
-              ? peachColor
-              : Colors
-                  .grey.shade300, // Different colors for sent/received messages
+          color: message.isSentByUser ? peachColor : Colors.grey.shade300,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Text(
@@ -173,7 +212,6 @@ class _ChatTabState extends State<ChatTab> {
     );
   }
 
-  // Build message input field with send button
   Widget _buildMessageInput() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -202,19 +240,20 @@ class _ChatTabState extends State<ChatTab> {
     );
   }
 
-  // Handle sending a message
   void _sendMessage() {
     if (_messageController.text.isNotEmpty && _selectedTherapist != null) {
       setState(() {
         _messages.insert(
           0,
-          ChatMessage(
-            text: _messageController.text,
-            isSentByUser: true,
-          ),
+          ChatMessage(text: _messageController.text, isSentByUser: true),
         );
-        _messageController
-            .clear(); // Clear the input field after sending the message
+        // Emit the message to the server
+        socket.emit('private_message', {
+          'content': _messageController.text,
+          'toUserId': _selectedTherapist!.id,
+          'fromUserId': patient,
+        });
+        _messageController.clear(); // Clear the input field
       });
     }
   }
