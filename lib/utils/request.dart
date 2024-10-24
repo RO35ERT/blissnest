@@ -36,7 +36,6 @@ Future<http.Response?> sendHttpRequestWithAuth({
   http.Response? response;
 
   try {
-    // Sending the request based on the method
     switch (method.toUpperCase()) {
       case 'POST':
         response = await http.post(

@@ -3,7 +3,6 @@ import 'package:blissnest/core/auth.dart';
 import 'package:blissnest/model/appointment.dart';
 import 'package:blissnest/model/therapist.dart';
 import 'package:blissnest/model/user_model.dart';
-import 'package:blissnest/model/user_response.dart';
 import 'package:blissnest/utils/functions.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
