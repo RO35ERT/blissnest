@@ -32,11 +32,16 @@ class _ChatTabState extends State<ChatTab> {
   @override
   void initState() {
     super.initState();
+    _setIdAndConnectSocket();
     _fetchTherapists();
-    _connectSocket();
   }
 
-  void setId() async {
+  Future<void> _setIdAndConnectSocket() async {
+    await setId(); // Set the patient ID
+    _connectSocket(); // Connect to the socket after setting patient ID
+  }
+
+  Future<void> setId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       patient = prefs.getInt("id") ?? 3;
@@ -54,14 +59,14 @@ class _ChatTabState extends State<ChatTab> {
   }
 
   void _connectSocket() {
-    socket = IO.io('http://http://10.0.2.2:3001', <String, dynamic>{
+    socket = IO.io('http://10.0.2.2:3001', <String, dynamic>{
       'transports': ['websocket'],
-      'autoConnect': false,
+      'autoConnect': true,
     });
 
     socket.connect();
 
-    socket.on('connect', (_) {
+    socket.on('connection', (_) {
       print('Connected to socket server');
     });
 
