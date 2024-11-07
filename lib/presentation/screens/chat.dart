@@ -1,3 +1,4 @@
+import 'package:blissnest/core/message.dart';
 import 'package:blissnest/model/therapist.dart';
 import 'package:blissnest/theme/colors.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +29,7 @@ class _ChatTabState extends State<ChatTab> {
   TherapistModel? _selectedTherapist;
   int patient = 3;
   late IO.Socket socket;
+  final messageService = MessageService();
 
   @override
   void initState() {
@@ -59,28 +61,31 @@ class _ChatTabState extends State<ChatTab> {
   }
 
   void _connectSocket() {
-    socket = IO.io('http://10.0.2.2:3001', <String, dynamic>{
-      'transports': ['websocket'],
-      'autoConnect': true,
-    });
-
-    socket.connect();
-
-    socket.on('connection', (_) {
-      print('Connected to socket server');
-    });
-
-    // Listen for incoming private messages
-    socket.on('private_message', (data) {
-      setState(() {
-        _messages.insert(
-            0, ChatMessage(text: data['message'], isSentByUser: false));
+    try {
+      socket = IO.io('http://10.0.2.2:3001', <String, dynamic>{
+        'transports': ['websocket'],
+        'autoConnect': true,
       });
-    });
 
-    socket.on('disconnect', (_) {
-      print('Disconnected from socket server');
-    });
+      socket.connect();
+
+      socket.on('connect', (_) {
+        print('Connected to socket server');
+      });
+
+      socket.on('private_message', (data) {
+        setState(() {
+          _messages.insert(
+              0, ChatMessage(text: data['content'], isSentByUser: false));
+        });
+      });
+
+      socket.on('disconnect', (_) {
+        print('Disconnected from socket server');
+      });
+    } catch (e) {
+      print("Error connecting to socket: $e");
+    }
   }
 
   @override
@@ -258,6 +263,12 @@ class _ChatTabState extends State<ChatTab> {
           'toUserId': _selectedTherapist!.id,
           'fromUserId': patient,
         });
+
+        messageService.sendMessage(
+            receiverId: _selectedTherapist!.id,
+            messageContent: _messageController.text,
+            senderId: patient,
+            context: context);
         _messageController.clear(); // Clear the input field
       });
     }

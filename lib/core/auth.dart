@@ -102,6 +102,18 @@ class AuthService {
     }
   }
 
+  Future<UserModel?> fetchMessages(BuildContext context, int id) async {
+    final response = await sendHttpRequestWithAuth(
+        method: 'GET', endpoint: '$baseUrl/messages/$id', context: context);
+
+    if (response != null && response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+      return UserModel.fromJson(responseData);
+    } else {
+      return null; // Handle failure
+    }
+  }
+
   Future<List<UserResponseModel>?> fetchNonPatients(
       BuildContext context) async {
     final response = await sendHttpRequestWithAuth(
