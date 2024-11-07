@@ -175,9 +175,9 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
         TextEditingController(text: appointment?.description);
     DateTime selectedDate = appointment?.date ?? DateTime.now();
 
-    // Reset selectedTherapist to the current appointment's therapist if editing
+    // When editing, use the current appointment's therapist if available
     if (appointment != null) {
-      selectedTherapist = 0;
+      selectedTherapist = appointment.doctorId; // Keep current therapist
     }
 
     showDialog(
@@ -209,22 +209,36 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                DropdownButton<int>(
-                  hint: const Text("Select Therapist"),
-                  value: selectedTherapist,
-                  items: _therapists.map((UserResponseModel therapist) {
-                    return DropdownMenuItem<int>(
-                      value: therapist.id, // Assuming name field exists
-                      child: Text(therapist.name),
-                    );
-                  }).toList(),
-                  onChanged: (int? newValue) {
-                    setState(() {
-                      selectedTherapist = newValue!;
-                    });
-                  },
-                ),
+
+                // Show therapist selection only for new appointments
+                if (index == null)
+                  DropdownButton<int>(
+                    hint: const Text("Select Therapist"),
+                    value: selectedTherapist,
+                    items: _therapists.map((UserResponseModel therapist) {
+                      return DropdownMenuItem<int>(
+                        value: therapist.id,
+                        child: Text(therapist.name),
+                      );
+                    }).toList(),
+                    onChanged: (int? newValue) {
+                      setState(() {
+                        selectedTherapist = newValue!;
+                      });
+                    },
+                  )
+                else
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text(
+                      "Therapist: ${_therapists.firstWhere((t) => t.id == selectedTherapist).name}",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 const SizedBox(height: 10),
+
                 TextField(
                   readOnly: true,
                   controller: dateController,
@@ -254,25 +268,28 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                           // Add new appointment
                           final newAppointment =
                               await _appointmentService.createAppointment(
-                                  title: titleController.text,
-                                  date: selectedDate,
-                                  patientId: patient,
-                                  doctorId: selectedTherapist!,
-                                  context: context,
-                                  description: descriptionController.text);
+                            title: titleController.text,
+                            date: selectedDate,
+                            patientId: patient,
+                            doctorId: selectedTherapist!,
+                            context: context,
+                            description: descriptionController.text,
+                          );
                           setState(() {
                             _appointments.add(newAppointment!);
                           });
                         } else {
-                          final newA =
+                          // Update existing appointment, don't change therapist
+                          final updatedAppointment =
                               await _appointmentService.updateAppointment(
-                                  id: "0",
-                                  title: titleController.text,
-                                  date: selectedDate,
-                                  context: context,
-                                  description: descriptionController.text);
+                            id: "2",
+                            title: titleController.text,
+                            date: selectedDate,
+                            context: context,
+                            description: descriptionController.text,
+                          );
                           setState(() {
-                            _appointments[index] = newA!;
+                            _appointments[index] = updatedAppointment!;
                           });
                         }
 
