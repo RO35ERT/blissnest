@@ -2,7 +2,6 @@ import 'package:blissnest/core/auth.dart';
 import 'package:blissnest/model/user.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:provider/provider.dart';
 import '../../theme/text_styles.dart';
 import '../../theme/colors.dart';
 

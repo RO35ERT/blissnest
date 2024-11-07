@@ -268,9 +268,18 @@ class _HomeTabState extends State<HomeTab> {
                           margin: const EdgeInsets.only(right: 15),
                           child: Column(
                             children: [
-                              const CircleAvatar(
-                                backgroundColor: Colors.grey,
-                                radius: 30,
+                              CircleAvatar(
+                                backgroundColor: peachColor,
+                                radius: 25,
+                                child: Text(
+                                  _therapists[index].name[
+                                      0], // First letter of therapist's name
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
                               const SizedBox(height: 3),
                               Text(
