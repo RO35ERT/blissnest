@@ -1,7 +1,10 @@
 import 'package:blissnest/core/appointment.dart';
 import 'package:blissnest/core/auth.dart';
+import 'package:blissnest/core/quotes.dart';
+import 'package:blissnest/core/rating.dart';
 import 'package:blissnest/model/appointment.dart';
 import 'package:blissnest/model/therapist.dart';
+import 'package:blissnest/model/therapy_res.dart';
 import 'package:blissnest/model/user_model.dart';
 import 'package:blissnest/utils/functions.dart';
 import 'package:flutter/material.dart';
@@ -22,8 +25,15 @@ class _HomeTabState extends State<HomeTab> {
   final List<TherapistModel> _therapists = [];
   final AuthService _authService = AuthService();
   final AppointmentService _appointmentService = AppointmentService();
+  final RatingService _ratingService = RatingService();
+  final QuoteService _quoteService = QuoteService();
   int patient = 3;
+
   UserModel? _user;
+  double rating = 0;
+  String _tipOfTheDay =
+      'Take a 5-minute break every hour to stretch and reset your mind.';
+  String author = "";
 
   @override
   void initState() {
@@ -31,6 +41,7 @@ class _HomeTabState extends State<HomeTab> {
     _fetchUser();
     _fetchAppointments();
     _fetchTherapists();
+    _fetchTipOfTheDay();
   }
 
   void setId() async {
@@ -38,6 +49,16 @@ class _HomeTabState extends State<HomeTab> {
     setState(() {
       patient = prefs.getInt("id") ?? 3;
     });
+  }
+
+  Future<void> _fetchTipOfTheDay() async {
+    final quote = await _quoteService.fetchTodayQuote();
+    if (quote != null) {
+      setState(() {
+        _tipOfTheDay = quote.quote;
+        author = quote.author;
+      });
+    }
   }
 
   Future<void> _fetchAppointments() async {
@@ -75,9 +96,6 @@ class _HomeTabState extends State<HomeTab> {
     '“You are enough just as you are.”',
     '“Do not let what you cannot do interfere with what you can do.”',
   ];
-
-  final String _tipOfTheDay =
-      'Take a 5-minute break every hour to stretch and reset your mind.';
 
   @override
   Widget build(BuildContext context) {
@@ -374,7 +392,16 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   void _showTherapistDetailsModal(
-      BuildContext context, TherapistModel therapist) {
+      BuildContext context, TherapistModel therapist) async {
+    // Fetch the rating data before opening the modal
+    final TherapistRatingResponse? rating =
+        await _ratingService.getRatingsByTherapistId(
+      context: context,
+      therapistId: therapist.id,
+    );
+
+    // Show the modal bottom sheet after fetching the rating data
+    // ignore: use_build_context_synchronously
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -416,24 +443,38 @@ class _HomeTabState extends State<HomeTab> {
                   "Email: ${therapist.email}",
                   style: const TextStyle(fontSize: 20),
                 ),
-              ), // Example details
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: GestureDetector(
                   onTap: () => {_launchInWebView(therapist.phone)},
-                  child: Text("Phone: ${therapist.phone}",
-                      style: const TextStyle(fontSize: 20)),
+                  child: Text(
+                    "Phone: ${therapist.phone}",
+                    style: const TextStyle(fontSize: 20),
+                  ),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Text("Qualification: ${therapist.qualification}",
-                    style: const TextStyle(fontSize: 20)),
+                child: Text(
+                  "Qualification: ${therapist.qualification}",
+                  style: const TextStyle(fontSize: 20),
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Text("Facility: ${therapist.facility}",
-                    style: const TextStyle(fontSize: 20)),
+                child: Text(
+                  "Facility: ${therapist.facility}",
+                  style: const TextStyle(fontSize: 20),
+                ),
+              ),
+              // Display Rating if available, else "N/A"
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Text(
+                  "Rating: ${rating?.overallRating ?? 'N/A'}",
+                  style: const TextStyle(fontSize: 20),
+                ),
               ),
               const SizedBox(height: 20),
             ],

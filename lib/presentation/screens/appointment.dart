@@ -1,9 +1,11 @@
 import 'package:blissnest/core/appointment.dart';
 import 'package:blissnest/core/auth.dart';
+import 'package:blissnest/core/rating.dart';
 import 'package:blissnest/model/appointment.dart';
 import 'package:blissnest/model/user_response.dart';
 import 'package:blissnest/theme/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Ensure to add the font_awesome_flutter package
 
@@ -21,7 +23,9 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
   int patient = 3;
   DateTime? selectedDate;
   final AppointmentService _appointmentService = AppointmentService();
+  final RatingService _ratingService = RatingService();
   final AuthService _authService = AuthService();
+  double rating = 3;
 
   @override
   void initState() {
@@ -104,62 +108,71 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
 
   Widget _buildAppointmentCard(
       BuildContext context, Appointment appointment, int index) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              appointment.title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+    bool isOldAppointment = appointment.date.isBefore(DateTime.now());
+
+    return GestureDetector(
+      onTap: () {
+        if (isOldAppointment) {
+          _showRatingBottomSheet(context, appointment);
+        }
+      },
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                appointment.title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              'Date: ${appointment.date.toLocal()}',
-              style: const TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              'Status: ${appointment.status}',
-              style: const TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              appointment.description,
-              style: const TextStyle(color: Colors.black),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  icon: const Icon(FontAwesomeIcons.pen),
-                  onPressed: () {
-                    _showAppointmentDialog(context,
-                        appointment: appointment, index: index);
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(FontAwesomeIcons.trash, color: Colors.red),
-                  onPressed: () async {
-                    await _appointmentService.deleteAppointment(
-                        id: appointment.id, context: context);
-                    setState(() {
-                      _appointments.removeAt(index);
-                    });
-                  },
-                ),
-              ],
-            ),
-          ],
+              const SizedBox(height: 5),
+              Text(
+                'Date: ${appointment.date.toLocal()}',
+                style: const TextStyle(color: Colors.grey),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                'Status: ${appointment.status}',
+                style: const TextStyle(color: Colors.grey),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                appointment.description,
+                style: const TextStyle(color: Colors.black),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    icon: const Icon(FontAwesomeIcons.pen),
+                    onPressed: () {
+                      _showAppointmentDialog(context,
+                          appointment: appointment, index: index);
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(FontAwesomeIcons.trash, color: Colors.red),
+                    onPressed: () async {
+                      await _appointmentService.deleteAppointment(
+                          id: appointment.id, context: context);
+                      setState(() {
+                        _appointments.removeAt(index);
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -282,7 +295,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                           // Update existing appointment, don't change therapist
                           final updatedAppointment =
                               await _appointmentService.updateAppointment(
-                            id: "2",
+                            id: appointment!.id.toString(),
                             title: titleController.text,
                             date: selectedDate,
                             context: context,
@@ -329,5 +342,90 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
             pickedDate.toLocal().toString().split(' ')[0]; // Format the date
       });
     }
+  }
+
+  void _showRatingBottomSheet(BuildContext context, Appointment appointment) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      isScrollControlled: true, // To ensure the content doesn't get clipped
+      builder: (BuildContext context) {
+        return Container(
+          width: double.infinity, // Set width to take up full screen width
+          padding: const EdgeInsets.all(16.0),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Rate Your Experience',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              RatingBar.builder(
+                initialRating: 3, // Default rating
+                minRating: 1,
+                direction: Axis.horizontal,
+                allowHalfRating: true,
+                itemCount: 5,
+                itemBuilder: (context, index) {
+                  switch (index) {
+                    case 0:
+                      return const Icon(
+                        Icons.sentiment_very_dissatisfied,
+                        color: Colors.red,
+                      );
+                    case 1:
+                      return const Icon(
+                        Icons.sentiment_dissatisfied,
+                        color: Colors.redAccent,
+                      );
+                    case 2:
+                      return const Icon(
+                        Icons.sentiment_neutral,
+                        color: Colors.amber,
+                      );
+                    case 3:
+                      return const Icon(
+                        Icons.sentiment_satisfied,
+                        color: Colors.lightGreen,
+                      );
+                    case 4:
+                      return const Icon(
+                        Icons.sentiment_very_satisfied,
+                        color: Colors.green,
+                      );
+                  }
+                  return const Icon(Icons.star);
+                },
+                onRatingUpdate: (r) {
+                  rating = r;
+                },
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(peachColor),
+                ),
+                onPressed: () {
+                  _ratingService.createRating(
+                      therapistId: appointment.doctorId,
+                      ratingValue: rating,
+                      comment: "",
+                      context: context);
+                  Navigator.pop(context);
+                },
+                child: const Text('Submit'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
