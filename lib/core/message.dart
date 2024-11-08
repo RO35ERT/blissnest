@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:blissnest/model/message.dart';
+import 'package:blissnest/presentation/screens/chat.dart';
 import 'package:blissnest/utils/constants.dart';
 import 'package:blissnest/utils/request.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +34,38 @@ class MessageService {
       }
     } catch (error) {
       print('Error while sending message: $error');
+    }
+  }
+
+  Future<List<ChatMessage>> fetchMessages(
+      int userId, int currentUserId, BuildContext context) async {
+    try {
+      final response = await sendHttpRequestWithAuth(
+        endpoint: '$baseUrl/messages/$userId',
+        method: "GET",
+        context: context,
+      );
+
+      if (response!.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+
+        data.sort((a, b) => DateTime.parse(a['createdAt'])
+            .compareTo(DateTime.parse(b['createdAt'])));
+
+        return data.map<ChatMessage>((msg) {
+          final isSentByUser = msg['senderId'] == currentUserId;
+          return ChatMessage(
+            text: msg['content'],
+            isSentByUser: isSentByUser,
+          );
+        }).toList();
+      } else {
+        print('Failed to fetch messages: ${response.statusCode}');
+        return [];
+      }
+    } catch (e) {
+      print('Error fetching messages: $e');
+      return [];
     }
   }
 }

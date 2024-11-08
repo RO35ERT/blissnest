@@ -12,6 +12,11 @@ class ChatMessage {
   bool isSentByUser;
 
   ChatMessage({required this.text, required this.isSentByUser});
+
+  @override
+  String toString() {
+    return 'ChatMessage(text: $text, isSentByUser: $isSentByUser)';
+  }
 }
 
 class ChatTab extends StatefulWidget {
@@ -22,7 +27,7 @@ class ChatTab extends StatefulWidget {
 }
 
 class _ChatTabState extends State<ChatTab> {
-  final List<ChatMessage> _messages = [];
+  List<ChatMessage> _messages = [];
   final AuthService _authService = AuthService();
   final List<TherapistModel> _therapists = [];
   final TextEditingController _messageController = TextEditingController();
@@ -41,6 +46,25 @@ class _ChatTabState extends State<ChatTab> {
   Future<void> _setIdAndConnectSocket() async {
     await setId(); // Set the patient ID
     _connectSocket(); // Connect to the socket after setting patient ID
+  }
+
+  Future<void> _fetchMessages(int id) async {
+    setState(() {
+      _messages = [];
+    });
+    try {
+      final fetchedMessages = await messageService.fetchMessages(
+        id,
+        patient,
+        context,
+      );
+      print(fetchedMessages);
+      setState(() {
+        _messages = fetchedMessages; // Set the fetched messages
+      });
+    } catch (error) {
+      print('Error fetching messages: $error');
+    }
   }
 
   Future<void> setId() async {
@@ -170,6 +194,8 @@ class _ChatTabState extends State<ChatTab> {
           _selectedTherapist = therapist;
           _messages.clear();
         });
+
+        _fetchMessages(therapist.id);
         // Emit an event to identify the user with the server
         socket.emit('identify', patient);
       },
