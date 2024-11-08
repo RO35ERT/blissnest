@@ -49,9 +49,8 @@ class MessageService {
       if (response!.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
 
-        data.sort((a, b) => DateTime.parse(a['createdAt'])
-            .compareTo(DateTime.parse(b['createdAt'])));
-
+        data.sort((a, b) => DateTime.parse(b['createdAt'])
+            .compareTo(DateTime.parse(a['createdAt'])));
         return data.map<ChatMessage>((msg) {
           final isSentByUser = msg['senderId'] == currentUserId;
           return ChatMessage(

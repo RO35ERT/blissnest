@@ -58,7 +58,7 @@ class _ChatTabState extends State<ChatTab> {
         patient,
         context,
       );
-      print(fetchedMessages);
+      // print(fetchedMessages);
       setState(() {
         _messages = fetchedMessages; // Set the fetched messages
       });
