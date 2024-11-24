@@ -326,7 +326,7 @@ class _HomeTabState extends State<HomeTab> {
                   children: [
                     TextButton(
                       onPressed: () {
-                        _launchInWebView('1234567890');
+                        _launchInWebView('0777062807');
                       },
                       child: const Text(
                         'Emergency',
@@ -339,7 +339,7 @@ class _HomeTabState extends State<HomeTab> {
                     const SizedBox(width: 10),
                     TextButton(
                       onPressed: () {
-                        _launchInWebView('0987654321');
+                        _launchInWebView('0960165014');
                       },
                       child: const Text(
                         'Call Center',
@@ -352,7 +352,7 @@ class _HomeTabState extends State<HomeTab> {
                     const SizedBox(width: 10),
                     TextButton(
                       onPressed: () {
-                        _launchInWebView('1112223333');
+                        _launchInWebView('0960165014');
                       },
                       child: const Text(
                         'Customer Care',
