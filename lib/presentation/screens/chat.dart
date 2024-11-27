@@ -86,7 +86,7 @@ class _ChatTabState extends State<ChatTab> {
 
   void _connectSocket() {
     try {
-      socket = IO.io('http://10.0.2.2:3001', <String, dynamic>{
+      socket = IO.io('http://192.168.52.32:3001', <String, dynamic>{
         'transports': ['websocket'],
         'autoConnect': true,
       });
