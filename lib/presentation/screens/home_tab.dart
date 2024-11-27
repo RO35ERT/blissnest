@@ -321,8 +321,9 @@ class _HomeTabState extends State<HomeTab> {
                     color: orangeColor,
                   ),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                Wrap(
+                  spacing: 10.0, // Horizontal spacing between children
+                  runSpacing: 10.0, // Vertical spacing between lines
                   children: [
                     TextButton(
                       onPressed: () {
@@ -336,7 +337,6 @@ class _HomeTabState extends State<HomeTab> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
                     TextButton(
                       onPressed: () {
                         _launchInWebView('0960165014');
@@ -349,7 +349,6 @@ class _HomeTabState extends State<HomeTab> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
                     TextButton(
                       onPressed: () {
                         _launchInWebView('0960165014');
